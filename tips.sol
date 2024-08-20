@@ -23,6 +23,7 @@ contract tips {
 
     //3.2 add waitress
     function addWaitress(address payable walletAddress,string memory name) public {
+        require(msg.sender == owner, "only the owner can call this function"); //not function
          bool waitressExist = false;
 
          if(waitress.length >=1){
@@ -38,6 +39,19 @@ contract tips {
         }
     }
     //4. remove user
+    function rewoveWaitress(address payable walletAddress) public {
+        if(waitress.length>0){
+            for(uint i=0; i<waitress.length; i++){
+                if(waitress[i].walletAddress==walletAddress){
+                    for (uint j=1; j<waitress.length-1; j++){
+                        waitress[j]=waitress[j+1];
+                    }
+                    waitress.pop();
+                    break;
+                }
+            }
+        }
+    }
 
     //5. view user
     function viewWaitress() public view returns(Waitress[] memory) {
@@ -45,4 +59,19 @@ contract tips {
     }
 
     //6. distribute tips
+    function distrubiteTips() public {
+        require(address(this).balance > 0, "Insufficient balance in the contract"); //no monney
+        if(waitress.length>=1){
+            uint amount = address(this).balance / waitress.length;
+            for(uint i=0; i<waitress.length; i++){
+                transfer(waitress[i].walletAddress,amount);
+            }
+        } 
+            
+        
+    }
+    //7. transfer monney
+    function transfer(address payable walletAddress, uint amount) internal {
+        walletAddress.transfer(amount);
+    }
 }
